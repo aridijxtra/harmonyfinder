@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmony Finder</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;color:#e8e8f0;min-height:100vh;padding:24px 16px 48px}
+  h1{text-align:center;font-size:26px;font-weight:600;color:#c9b8ff;margin-bottom:6px;letter-spacing:.04em}
+  .subtitle{text-align:center;font-size:13px;color:#8888aa;margin-bottom:28px}
+  .wrap{max-width:820px;margin:0 auto}
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+  label{font-size:13px;color:#8888aa;white-space:nowrap}
+  select{font-size:13px;padding:6px 10px;border-radius:10px;border:1px solid #2a2a4a;background:#16213e;color:#e8e8f0;cursor:pointer}
+  .section-label{font-size:11px;font-weight:600;color:#555577;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+  .note-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem}
+  .nbtn{padding:8px 14px;border-radius:10px;border:1px solid #2e2e5a;background:#0f3460;color:#a8c8ff;font-size:13px;font-weight:600;cursor:pointer;transition:background .1s,border-color .1s,color .1s}
+  .nbtn:hover{background:#1a4a80;border-color:#5588cc;color:#d0e8ff}
+  .nbtn.active{background:#2255aa;border-color:#66aaff;color:#ffffff}
+  .chord-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+  .cbtn{padding:8px 16px;border-radius:10px;border:1px solid #2e2e5a;background:#16213e;color:#88bbaa;font-size:13px;font-weight:600;cursor:pointer;transition:background .1s,border-color .1s,color .1s}
+  .cbtn:hover{background:#1a2e28;border-color:#338866}
+  .cbtn.active{background:#1a3520;border-color:#338855;color:#66cc88}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+  button.act{padding:8px 18px;border-radius:10px;border:1px solid #2a2a4a;background:#16213e;color:#e8e8f0;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .1s,border-color .1s}
+  button.act:hover{background:#1e2a50;border-color:#4a4a70}
+  button.act.primary{border-color:#7c5ddb;color:#c9b8ff}
+  button.act.primary:hover{background:#2a1f5a;border-color:#9977ff}
+  button.act:disabled{opacity:.35;cursor:default;pointer-events:none}
+  .seq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;min-height:70px;align-items:flex-start}
+  .step{background:#16213e;border:1px solid #2a2a4a;border-radius:12px;padding:10px 12px;min-width:68px;text-align:center;position:relative}
+  .step-mel{font-size:16px;font-weight:700;color:#c9b8ff}
+  .step-chord{font-size:11px;color:#66cc88;margin-top:3px}
+  .step-del{position:absolute;top:5px;right:7px;font-size:12px;color:#444466;cursor:pointer;line-height:1;font-weight:700}
+  .step-del:hover{color:#cc5544}
+  .empty-seq{font-size:13px;color:#444466;padding:1rem 0;font-style:italic}
+  .divider{border:none;border-top:1px solid #2a2a4a;margin:1.5rem 0}
+  .harmony-area{margin-top:0}
+  .harmony-steps{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem}
+  .hstep{background:#16213e;border:1px solid #2a2a4a;border-radius:12px;padding:10px 12px;min-width:72px}
+  .hstep-mel{font-size:14px;font-weight:700;color:#c9b8ff;margin-bottom:2px}
+  .hstep-chord{font-size:10px;color:#66cc88;margin-bottom:8px}
+  .harm-opts{display:flex;flex-direction:column;gap:4px}
+  .hopt{display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;border:1px solid #2a2a4a;background:#0d1830;cursor:pointer;transition:background .1s,border-color .1s}
+  .hopt:hover{background:#162040;border-color:#4a4a70}
+  .hopt.best{border-color:#4433aa;background:#1a1535}
+  .hopt.selected{outline:2px solid #7c5ddb}
+  .hopt-note{font-size:13px;font-weight:700;color:#e8e8f0;min-width:22px}
+  .hopt.best .hopt-note{color:#9988ee}
+  .hopt-tag{font-size:9px;padding:2px 5px;border-radius:4px;font-weight:700;letter-spacing:.03em}
+  .tag-chord{background:#0a2218;color:#44cc88}
+  .tag-pass{background:#1a1f35;color:#8899cc}
+  .tag-avoid{background:#2a1010;color:#cc6655}
+  .hopt-int{font-size:10px;color:#444466;margin-left:auto}
+  .legend-row{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#8888aa;margin-bottom:1rem}
+  .leg{display:flex;align-items:center;gap:5px}
+  .ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  @media(max-width:480px){
+    h1{font-size:20px}
+    .nbtn,.cbtn{font-size:12px;padding:7px 10px}
+    .hstep{min-width:60px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Harmony Finder</h1>
+  <p class="subtitle">Build a melody, assign chords, and explore harmony note options per step</p>
+
+  <div class="row">
+    <label>Key:</label>
+    <select id="keySelect"></select>
+    <select id="modeSelect">
+      <option value="major">Major</option>
+      <option value="minor">Minor (natural)</option>
+      <option value="dorian">Dorian</option>
+      <option value="mixolydian">Mixolydian</option>
+    </select>
+  </div>
+
+  <div class="section-label">1 — pick melody note</div>
+  <div class="note-grid" id="noteGrid"></div>
+
+  <div class="section-label">2 — pick chord</div>
+  <div class="chord-grid" id="chordGrid"></div>
+
+  <div class="actions">
+    <button class="act primary" id="addBtn" disabled>+ Add step</button>
+    <button class="act" id="clearBtn">✕ Clear all</button>
+  </div>
+
+  <div class="section-label">Melody sequence</div>
+  <div class="seq" id="seq">
+    <span class="empty-seq">No steps yet — pick a note and a chord above, then add.</span>
+  </div>
+
+  <hr class="divider" id="harmDivider" style="display:none">
+
+  <div class="harmony-area" id="harmonyArea" style="display:none">
+    <div class="section-label" style="margin-bottom:.75rem">Harmony options per step</div>
+    <div class="legend-row">
+      <span class="leg"><span class="ldot" style="background:#44cc88"></span>Chord tone</span>
+      <span class="leg"><span class="ldot" style="background:#8899cc"></span>Passing tone</span>
+      <span class="leg"><span class="ldot" style="background:#cc6655"></span>Avoid note</span>
+      <span class="leg"><span class="ldot" style="background:#9988ee"></span>Best pick</span>
+    </div>
+    <div class="harmony-steps" id="harmonySteps"></div>
+    <div class="actions">
+      <button class="act primary" id="playBtn">▶ Play melody + harmony</button>
+      <button class="act" id="playMelBtn">▶ Melody only</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CHROMA=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const BASE_FREQ={C:261.63,"C#":277.18,D:293.66,"D#":311.13,E:329.63,F:349.23,"F#":369.99,G:392.00,"G#":415.30,A:440.00,"A#":466.16,B:493.88};
+const MODES={
+  major:     [0,2,4,5,7,9,11],
+  minor:     [0,2,3,5,7,8,10],
+  dorian:    [0,2,3,5,7,9,10],
+  mixolydian:[0,2,4,5,7,9,10],
+};
+const CHORD_TYPES={
+  major:     ["maj","min","min","maj","maj","min","dim"],
+  minor:     ["min","dim","maj","min","min","maj","maj"],
+  dorian:    ["min","min","maj","maj","min","dim","maj"],
+  mixolydian:["maj","min","dim","maj","min","min","maj"],
+};
+const CHORD_INTERVALS={maj:[0,4,7],min:[0,3,7],dim:[0,3,6]};
+const INTERVAL_NAMES=["R","m2","M2","m3","M3","P4","♭5","P5","m6","M6","m7","M7"];
+
+let selectedNote=null,selectedChord=null,sequence=[],selectedHarmony={};
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+
+function noteFreq(note,octave){return BASE_FREQ[note]*Math.pow(2,octave-4);}
+function playTone(freq,start,dur,gain){
+  const ctx=getCtx();
+  const bsz=Math.floor(ctx.sampleRate/freq);
+  const buf=ctx.createBuffer(1,bsz,ctx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<bsz;i++)d[i]=Math.random()*2-1;
+  const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+  const flt=ctx.createBiquadFilter();flt.type='lowpass';
+  flt.frequency.setValueAtTime(freq*4,start);
+  flt.frequency.exponentialRampToValueAtTime(freq*1.5,start+0.05);
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(gain,start);
+  g.gain.exponentialRampToValueAtTime(gain*0.7,start+0.05);
+  g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+  src.connect(flt);flt.connect(g);g.connect(ctx.destination);
+  src.start(start);src.stop(start+dur+0.05);
+}
+
+function scaleNotes(root,mode){
+  const ri=CHROMA.indexOf(root);
+  return MODES[mode].map(i=>CHROMA[(ri+i)%12]);
+}
+function chordNotes(root,type){
+  const ri=CHROMA.indexOf(root);
+  return CHORD_INTERVALS[type].map(i=>CHROMA[(ri+i)%12]);
+}
+function getDiatonicChords(root,mode){
+  const scale=scaleNotes(root,mode);
+  return scale.map((n,i)=>({
+    root:n,
+    type:CHORD_TYPES[mode][i],
+    label:`${n}${CHORD_TYPES[mode][i]==='maj'?'':CHORD_TYPES[mode][i]==='min'?'m':'°'}`,
+    degree:i+1
+  }));
+}
+function rankHarmonyNotes(melNote,chordRoot,chordType,scaleNotesList){
+  const ct=chordNotes(chordRoot,chordType);
+  const melIdx=CHROMA.indexOf(melNote);
+  const opts=[];
+  CHROMA.forEach(note=>{
+    if(note===melNote)return;
+    const interval=(CHROMA.indexOf(note)-melIdx+12)%12;
+    const isChord=ct.includes(note);
+    const isScale=scaleNotesList.includes(note);
+    let category,score,tag;
+    if(isChord){category='chord';score=10-Math.min(interval,12-interval);tag='Chord tone';}
+    else if(isScale){category='pass';score=5-Math.min(interval,12-interval)*0.5;tag='Passing tone';}
+    else{category='avoid';score=-5;tag='Avoid';}
+    opts.push({note,interval,intName:INTERVAL_NAMES[interval],category,score,tag});
+  });
+  opts.sort((a,b)=>b.score-a.score);
+  return opts.slice(0,5);
+}
+
+function render(){
+  const root=document.getElementById('keySelect').value;
+  const mode=document.getElementById('modeSelect').value;
+  const scale=scaleNotes(root,mode);
+  const chords=getDiatonicChords(root,mode);
+
+  const ng=document.getElementById('noteGrid');
+  ng.innerHTML='';
+  scale.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='nbtn'+(selectedNote===n?' active':'');
+    b.textContent=n;
+    b.onclick=()=>{selectedNote=n;render();};
+    ng.appendChild(b);
+  });
+
+  const cg=document.getElementById('chordGrid');
+  cg.innerHTML='';
+  chords.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cbtn'+(selectedChord&&selectedChord.root===c.root&&selectedChord.type===c.type?' active':'');
+    b.textContent=c.label;
+    b.onclick=()=>{selectedChord=c;render();};
+    cg.appendChild(b);
+  });
+
+  document.getElementById('addBtn').disabled=!(selectedNote&&selectedChord);
+
+  const seqEl=document.getElementById('seq');
+  if(sequence.length===0){
+    seqEl.innerHTML='<span class="empty-seq">No steps yet — pick a note and a chord above, then add.</span>';
+  } else {
+    seqEl.innerHTML='';
+    sequence.forEach((step,i)=>{
+      const div=document.createElement('div');div.className='step';
+      div.innerHTML=`<span class="step-del" data-i="${i}" title="Remove">×</span><div class="step-mel">${step.note}</div><div class="step-chord">${step.chord.label}</div>`;
+      seqEl.appendChild(div);
+    });
+    seqEl.querySelectorAll('.step-del').forEach(el=>{
+      el.onclick=()=>{sequence.splice(+el.dataset.i,1);renderHarmony();render();};
+    });
+  }
+  renderHarmony();
+}
+
+function renderHarmony(){
+  const root=document.getElementById('keySelect').value;
+  const mode=document.getElementById('modeSelect').value;
+  const scale=scaleNotes(root,mode);
+  const ha=document.getElementById('harmonyArea');
+  const hd=document.getElementById('harmDivider');
+  const hs=document.getElementById('harmonySteps');
+  if(sequence.length===0){ha.style.display='none';hd.style.display='none';return;}
+  ha.style.display='block';hd.style.display='block';
+  hs.innerHTML='';
+  sequence.forEach((step,i)=>{
+    if(!selectedHarmony[i]){
+      const opts=rankHarmonyNotes(step.note,step.chord.root,step.chord.type,scale);
+      selectedHarmony[i]=opts[0]?.note;
+    }
+    const opts=rankHarmonyNotes(step.note,step.chord.root,step.chord.type,scale);
+    const div=document.createElement('div');div.className='hstep';
+    let html=`<div class="hstep-mel">${step.note}</div><div class="hstep-chord">${step.chord.label}</div><div class="harm-opts">`;
+    opts.forEach((o,oi)=>{
+      const isBest=oi===0;
+      const isSel=selectedHarmony[i]===o.note;
+      const tagCls=o.category==='chord'?'tag-chord':o.category==='pass'?'tag-pass':'tag-avoid';
+      html+=`<div class="hopt${isBest?' best':''}${isSel?' selected':''}" data-i="${i}" data-note="${o.note}">
+        <span class="hopt-note">${o.note}</span>
+        <span class="hopt-tag ${tagCls}">${o.tag}</span>
+        <span class="hopt-int">${o.intName}</span>
+      </div>`;
+    });
+    html+='</div>';
+    div.innerHTML=html;
+    hs.appendChild(div);
+  });
+  hs.querySelectorAll('.hopt').forEach(el=>{
+    el.onclick=()=>{selectedHarmony[+el.dataset.i]=el.dataset.note;renderHarmony();};
+  });
+}
+
+function playSequence(withHarmony){
+  const ctx=getCtx();if(ctx.state==='suspended')ctx.resume();
+  const stepDur=0.7,gap=0.05;
+  let t=ctx.currentTime+0.05;
+  sequence.forEach((step,i)=>{
+    playTone(noteFreq(step.note,4),t,stepDur,0.4);
+    if(withHarmony&&selectedHarmony[i]){
+      const interval=(CHROMA.indexOf(selectedHarmony[i])-CHROMA.indexOf(step.note)+12)%12;
+      const oct=interval<3?5:4;
+      playTone(noteFreq(selectedHarmony[i],oct),t,stepDur,0.28);
+    }
+    t+=stepDur+gap;
+  });
+}
+
+document.getElementById('addBtn').onclick=()=>{
+  if(!selectedNote||!selectedChord)return;
+  sequence.push({note:selectedNote,chord:selectedChord});
+  render();
+};
+document.getElementById('clearBtn').onclick=()=>{
+  sequence=[];selectedHarmony={};render();
+};
+document.getElementById('playBtn').onclick=()=>playSequence(true);
+document.getElementById('playMelBtn').onclick=()=>playSequence(false);
+
+const keySelect=document.getElementById('keySelect');
+CHROMA.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;keySelect.appendChild(o);});
+keySelect.onchange=()=>{selectedNote=null;selectedChord=null;sequence=[];selectedHarmony={};render();};
+document.getElementById('modeSelect').onchange=()=>{selectedNote=null;selectedChord=null;sequence=[];selectedHarmony={};render();};
+
+render();
+</script>
+</body>
+</html>
